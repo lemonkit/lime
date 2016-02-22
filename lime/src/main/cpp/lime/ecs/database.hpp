@@ -33,7 +33,7 @@ namespace lime{
 		public:
 			using F = void(*)(void * buff);
 			virtual ~column();
-			column(database &db,const uuid & id,std::size_t nsize,F f);
+			column(database &db,const uuid & id,std::size_t nsize,F createf,F closef);
 		public:
 
 			component* create();
@@ -63,7 +63,9 @@ namespace lime{
 			
 			std::size_t									_size;
 
-			F											_f;
+			F											_createf;
+
+			F											_closef;
 			
 			std::unordered_map<uuid, component*>		_rows;
 			
@@ -85,9 +87,17 @@ namespace lime{
 				new(buff)T();
 			}
 
+
+			static void closef(void * buff)
+			{
+				((T*)buff)->~T();
+
+				buff = nullptr;
+			}
+
 			static column* make(database &db, const uuid & id)
 			{
-				return new column(db,id,sizeof(T),createf);
+				return new column(db,id,sizeof(T),createf, closef);
 			}
 		};
 

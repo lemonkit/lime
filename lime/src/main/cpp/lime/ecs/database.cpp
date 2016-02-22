@@ -5,8 +5,8 @@
 namespace lime{
 	namespace ecs{
 
-		column::column(database &db,const uuid & id,std::size_t nsize,column::F f)
-			:_db(db),_id(id),_size(nsize + sizeof(component)), _f(f)
+		column::column(database &db,const uuid & id,std::size_t nsize,column::F createf, column::F closef)
+			:_db(db),_id(id),_size(nsize + sizeof(component)), _createf(createf),_closef(closef)
 		{
 
 		}
@@ -16,6 +16,8 @@ namespace lime{
 			for(auto kv : _rows)
 			{
 				auto c = kv.second;
+
+				_closef(c->buff());
 				
 				c->~component();
 
@@ -24,6 +26,8 @@ namespace lime{
 
 			for (auto c : _cached)
 			{
+				_closef(c->buff());
+
 				c->~component();
 
 				delete[](char*)c;
@@ -40,7 +44,7 @@ namespace lime{
 
 				try
 				{
-					_f(c->buff());
+					_createf(c->buff());
 				}
 				catch(...)
 				{
