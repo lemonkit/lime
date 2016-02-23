@@ -24,60 +24,40 @@ namespace lime{
 				delete[](char*)c;
 			}
 
-			for (auto c : _cached)
-			{
-				_closef(c->buff());
-
-				c->~component();
-
-				delete[](char*)c;
-			}
 		}
 
 		component* column::create()
 		{
-			if(_cached.empty())
+			auto buff = new char[_size];
+
+			auto c = new(buff)component(_db, *this, _id);
+
+			try
 			{
-				auto buff = new char[_size];
-
-				auto c = new(buff)component(_db,_id);
-
-				try
-				{
-					_createf(c->buff());
-				}
-				catch(...)
-				{
-					delete[] buff;
-					throw;
-				}
-				
-				_cached.insert(c);
-
-				return c;
+				_createf(c->buff());
+			}
+			catch (...)
+			{
+				delete[] buff;
+				throw;
 			}
 
-			return *_cached.begin();
+			return c;
 		}
 
-		void column::set(component* com, std::error_code & ec)
+		void column::set(component* com, std::error_code &)
 		{
-			if(_cached.count(com) == 0)
-			{
-				ec = make_error_code(errc::invalid_component);
-
-				return;
-			}
-
-			_cached.erase(com);
-
 			auto iter = _rows.find(com->entity_id());
 
 			if (iter != _rows.end())
 			{
 				iter->second->detach();
 
-				_cached.insert(iter->second);
+				_closef(iter->second->buff());
+
+				iter->second->~component();
+
+				delete[] (char*)iter->second;
 			}
 
 			_rows[com->entity_id()] = com;
@@ -95,20 +75,22 @@ namespace lime{
 			return nullptr;
 		}
 
-		component* column::remove(const uuid & id)
+		void column::remove(const uuid & id)
 		{
 			auto iter = _rows.find(id);
 
-			auto com = iter->second;
+			if(iter != _rows.end())
+			{
+				iter->second->detach();
 
-			_rows.erase(iter);
+				_closef(iter->second->buff());
 
-			return com;
-		}
+				iter->second->~component();
 
-		void column::collect()
-		{
+				delete[](char*)iter->second;
 
+				_rows.erase(iter);
+			}
 		}
 		
 		database::database()
@@ -128,10 +110,6 @@ namespace lime{
 				delete kv.second;
 			}
 
-			for (auto kv : _cached)
-			{
-				delete kv;
-			}
 		}
 
 		void database::set(component* com, std::error_code & ec)
@@ -142,7 +120,7 @@ namespace lime{
 				return;
 			}
 
-			if (_rows.count(com->entity_id()) == 0)
+			if (_rows.count(com->entity_id()) == 0 && _marked.count(com->entity_id()) == 0)
 			{
 				ec = make_error_code(errc::invalid_component);
 				return;
@@ -172,17 +150,16 @@ namespace lime{
 			return iter->second->get(entityid);
 		}
 
-		component* database::remove(const uuid & entityid, const uuid & comid, std::error_code & ec)
+		void database::remove(const uuid & entityid, const uuid & comid, std::error_code & ec)
 		{
 			auto iter = _columns.find(comid);
 
 			if (iter == _columns.end())
 			{
 				ec = make_error_code(errc::unknown_component_type);
-				return nullptr;
 			}
 
-			return iter->second->remove(entityid);
+			iter->second->remove(entityid);
 		}
 
 		component* database::create_component(const uuid & comid)
@@ -199,33 +176,18 @@ namespace lime{
 		}
 
 
-		entity& database::create(const uuid & entityid)
+		entity* database::create(const uuid & entityid)
 		{
-			auto iter = _rows.find(entityid);
-
-			if (iter != _rows.end())
+			if (_rows.count(entityid) != 0 || _marked.count(entityid) != 0)
 			{
 				throw std::system_error(make_error_code(errc::already_exists));
-			}
-
-			if(!_cached.empty())
-			{
-				auto obj = *_cached.begin();
-
-				_cached.erase(_cached.begin());
-
-				obj->id(entityid);
-
-				_rows[entityid] = obj;
-
-				return *obj;
 			}
 
 			auto obj = new entity(*this,entityid);
 
 			_rows[entityid] = obj;
 
-			return *obj;
+			return obj;
 		}
 
 		void database::close(entity* obj)
@@ -235,40 +197,46 @@ namespace lime{
 				kv.second->remove(obj->id());
 			}
 
-			if(1 != _rows.erase(obj->id()))
+			if(1 != _rows.erase(obj->id()) && 1 != _marked.erase(obj->id()))
 			{
 				throw std::system_error(make_error_code(errc::invalid_entity));
 				return;
 			}
 
-			_cached.insert(obj);
+			delete obj;
 		}
 
-		void database::collect()
+		void database::garbage_collect()
 		{
-			for(auto kv : _columns)
+			for(auto kv:_rows)
 			{
-				kv.second->collect();
+				for (auto kv2 : _columns)
+				{
+					kv2.second->remove(kv.second->id());
+				}
+
+				delete kv.second;
 			}
 
-			//TODO: performance gc 
+			_rows.clear();
 		}
 
-		bool database::has(const uuid & entityid) const
-		{
-			return _rows.count(entityid) != 0;
-		}
-
-		entity& database::get(const uuid & entityid) const
+	
+		entity* database::get(const uuid & entityid) const
 		{
 			auto iter = _rows.find(entityid);
 
-			if(iter != _rows.end())
+			if(iter == _rows.end())
 			{
-				throw std::system_error(errc::invalid_entity);
+				iter = _marked.find(entityid);
+
+				if(iter == _marked.end())
+				{
+					return nullptr;
+				}
 			}
 
-			return *iter->second;
+			return iter->second;
 		}
 
 		void database::create_column(column * cln)
@@ -279,6 +247,26 @@ namespace lime{
 			}
 
 			_columns[cln->id()] = cln;
+		}
+
+		void database::garbage_collect_mark(entity * obj)
+		{
+			if(_rows.erase(obj->id()) != 1)
+			{
+				throw std::system_error(make_error_code(errc::invalid_entity));
+			}
+
+			_marked[obj->id()] = obj;
+		}
+
+		void database::garbage_collect_unmark(entity * obj)
+		{
+			if (_marked.erase(obj->id()) != 1)
+			{
+				throw std::system_error(make_error_code(errc::invalid_entity));
+			}
+
+			_rows[obj->id()] = obj;
 		}
 	}
 }

@@ -4,6 +4,11 @@
 namespace lime{
 	namespace ecs{
 
+		void entity::visiable(bool flag)
+		{
+			_visiable = flag;
+		}
+
 		component* entity::set(const uuid & id, std::error_code & ec)
 		{
 
@@ -20,25 +25,46 @@ namespace lime{
 				return nullptr;
 			}
 
+			if(get(id) != nullptr)
+			{
+				ec = make_error_code(errc::duplicate_column_name);
+
+				return nullptr;
+			}
+
 			c->attach(this);
 
 			_db.set(c,ec);
 
+			_components.push_back(c);
+
 			return c;
 		}
 
-		component* entity::remove(const uuid & id, std::error_code & ec)
+		void entity::remove(const uuid & id, std::error_code & ec)
 		{
-			auto com =  _db.remove(_id,id,ec);
+			_db.remove(_id,id,ec);
 
-			com->detach();
-
-			return com;
+			for (auto iter = _components.begin(); iter != _components.end(); iter++)
+			{
+				if ((*iter)->id() == id)
+				{
+					_components.erase(iter);
+				}
+			}
 		}
 
-		component* entity::get(const uuid & id, std::error_code & ec) const
+		component* entity::get(const uuid & id) const
 		{
-			return _db.get(_id, id,ec);
+			for(auto c: _components)
+			{
+				if(c->id() == id)
+				{
+					return c;
+				}
+			}
+
+			return nullptr;
 		}
 	}
 }

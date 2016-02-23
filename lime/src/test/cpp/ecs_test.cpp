@@ -22,31 +22,32 @@ struct colunm_two
 	double y;
 };
 
+database db;
+auto cln1 = database::newid();
+auto cln2 = database::newid();
+auto o1 = db.create();
+
 test_(ecs){
-	database db;
 
-	auto o1 = &db.create();
-
-	auto cln1 = database::newid();
-	auto cln2 = database::newid();
-
+	o1->garbage_collect_mark();
+	
 	db.create_column<colunm_one>(cln1);
 	db.create_column<colunm_two>(cln2);
 
 	o1->set(cln1);
 	o1->set(cln2);
 
-	test_assert(o1->has(cln1));
-	test_assert(o1->has(cln2));
+	test_assert(o1->get(cln1) != nullptr);
+	test_assert(o1->get(cln2) != nullptr);
 
-	auto c = &o1->get<colunm_one>(cln1);
+	auto c = o1->get<colunm_one>(cln1);
 
 	c->name = "hello world";
 	c->text = "test column";
 
-	test_assert(c == &o1->get<colunm_one>(cln1));
+	test_assert(c == o1->get<colunm_one>(cln1));
 
-	c = &o1->get<colunm_one>(cln1);
+	c = o1->get<colunm_one>(cln1);
 
 	test_assert(c->name == "hello world");
 
@@ -58,10 +59,59 @@ test_(ecs){
 		{
 			if(row.first == cln1)
 			{
-				c = &row.second->get<colunm_one>();
+				c = row.second->get<colunm_one>();
 
 				c->name = "hello 2";
 			}
 		}
+	}
+
+	for (auto i = 0; i < 10000; i++)
+	{
+		auto o = db.create();
+
+		o->set(cln1);
+		o->set(cln2);
+
+		o1->add_child(o);
+
+		test_assert(o == db.get(o->id()));
+	}
+}
+
+
+
+bench_(get_component)
+{
+	for (int i = 0; i < N; i ++)
+	{
+		o1->get(cln2);
+	}
+}
+
+bench_(visiable)
+{
+	for (int i = 0; i < N; i++)
+	{
+		o1->visiable(true);
+		o1->visiable(false);
+	}
+}
+
+bench_(garbage_collection)
+{
+	stop_timer();
+	for (auto i = 0; i < 100; i++)
+	{
+		auto o = db.create();
+
+		o->set(cln1);
+		o->set(cln2);
+	}
+	start_timer();
+
+	for (int i = 0; i < N; i ++)
+	{
+		db.garbage_collect();
 	}
 }

@@ -42,13 +42,11 @@ namespace lime{
 
 			component* get(const uuid & id);
 			
-			component* remove(const uuid & id);
+			void remove(const uuid & id);
 
 		public:
 
 			const uuid & id() const { return _id; }
-
-			void collect();
 
 			const std::unordered_map<uuid, component*> & rows() const
 			{
@@ -68,8 +66,6 @@ namespace lime{
 			F											_closef;
 			
 			std::unordered_map<uuid, component*>		_rows;
-			
-			std::unordered_set<component*>				_cached;
 		};
 
 
@@ -95,9 +91,9 @@ namespace lime{
 				buff = nullptr;
 			}
 
-			static column* make(database &db, const uuid & id)
+			static column* make(database &dbase, const uuid & id)
 			{
-				return new column(db,id,sizeof(T),createf, closef);
+				return new column(dbase,id,sizeof(T),createf, closef);
 			}
 		};
 
@@ -119,20 +115,21 @@ namespace lime{
 
 		public:
 			
-			entity& create()
+			entity* create()
 			{
 				return create(newid());
 			}
 
-			entity& create(const uuid & entityid);
+			entity* create(const uuid & entityid);
 
-			entity& get(const uuid & entityid) const;
-
-			bool has(const uuid & entityid) const;
+			entity* get(const uuid & entityid) const;
 
 		public:
 
-			void collect();
+			/**
+			 * process garbage collect
+			 */
+			void garbage_collect();
 
 			void create_column(column * cln);
 
@@ -147,7 +144,6 @@ namespace lime{
 			{
 				return _columns;
 			}
-			
 
 		protected:
 
@@ -155,18 +151,21 @@ namespace lime{
 
 			void close(entity * obj);
 
+			void garbage_collect_mark(entity * obj);
+			void garbage_collect_unmark(entity * obj);
+		
 			component* create_component(const uuid & comid);
 
 			void set(component* com,std::error_code & ec);
 
 			component* get(const uuid & entityid,const uuid & comid, std::error_code & ec) const;
 			
-			component* remove(const uuid & entityid, const uuid & comid, std::error_code & ec);
+			void remove(const uuid & entityid, const uuid & comid, std::error_code & ec);
 		
 		private:
 			std::unordered_map<uuid, entity*>		_rows;
+			std::unordered_map<uuid, entity*>		_marked;
 			std::unordered_map<uuid, column*>		_columns;
-			std::unordered_set<entity*>				_cached;
 		};
 	}
 }

@@ -27,8 +27,8 @@ namespace lime {
 		
 			friend class column;
 			
-			component(database & db, const uuid & id)
-				:_db(db),_id(id),_entity(nullptr)
+			component(database & db,column &cln, const uuid & id)
+				:_db(db),_cln(cln),_id(id),_entity(nullptr)
 			{}
 
 			virtual ~component(){}
@@ -39,6 +39,11 @@ namespace lime {
 			}
 
 		public:
+
+			bool visiable() const
+			{
+				return _entity->visiable();
+			}
 
 			database & db() { return _db; }
 
@@ -59,13 +64,14 @@ namespace lime {
 			}
 
 			template<typename T>
-			T& get()
+			T* get()
 			{
-				return *reinterpret_cast<T*>(_buff);
+				return reinterpret_cast<T*>(_buff);
 			}
 
 		private:
 			database			&_db;
+			column				&_cln;
 			uuid				_id;
 			entity				*_entity;
 			char				_buff[1];

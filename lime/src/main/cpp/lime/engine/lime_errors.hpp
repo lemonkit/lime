@@ -1,18 +1,13 @@
-#ifndef LIME_ECS_ERRORS_HPP
-#define LIME_ECS_ERRORS_HPP
+#ifndef LIME_ERRORS_HPP
+#define LIME_ERRORS_HPP
 
 #include <string>
 #include <system_error>
 
-namespace lime { namespace ecs {
+namespace lime {
         enum class errc
         {
-			unknown_component_type = 1,
-			duplicate_column_name, 
-			invalid_component,
-			invalid_entity,
-			already_exists,
-			duplicate_child_name
+			duplicate_scene_name = 1,unknown_scene
         };
 
         class ecs_error_category : public std::error_category
@@ -28,16 +23,10 @@ namespace lime { namespace ecs {
             {
                 switch ((errc)val)
                 {
-                case errc::unknown_component_type:
-                    return "unknown component type";
-				case errc::invalid_component:
-					return "the component can't be handled by current database ";
-				case errc::invalid_entity:
-					return "the entity can't be handled by current database ";
-				case errc::already_exists:
-					return "the entity already created ";
-				case errc::duplicate_child_name:
-					return "duplicate child node name ";
+                case errc::duplicate_scene_name:
+                    return "duplicate scene name";
+				case errc::unknown_scene:
+					return "unknown scene";
                 }
 
 				return "unknown";
@@ -65,9 +54,10 @@ namespace lime { namespace ecs {
 
             return std::error_code(static_cast<int>(err), error_category);
         }
-    }}
+    
+}
 
 namespace std {
-    template<> struct is_error_code_enum<::lime::ecs::errc> : true_type {};
+    template<> struct is_error_code_enum<::lime::errc> : true_type {};
 }
-#endif //LEMON_IO_ERRORS_HPP
+#endif //LIME_ERRORS_HPP
