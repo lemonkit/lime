@@ -7,7 +7,7 @@
 namespace lime {
         enum class errc
         {
-			duplicate_scene_name = 1,unknown_scene
+			duplicate_scene_name = 1,unknown_scene,duplicate_system_name
         };
 
         class ecs_error_category : public std::error_category
@@ -27,6 +27,8 @@ namespace lime {
                     return "duplicate scene name";
 				case errc::unknown_scene:
 					return "unknown scene";
+				case errc::duplicate_system_name:
+					return "duplicate system name";
                 }
 
 				return "unknown";

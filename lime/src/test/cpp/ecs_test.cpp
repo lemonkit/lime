@@ -101,7 +101,7 @@ bench_(visiable)
 bench_(garbage_collection)
 {
 	stop_timer();
-	for (auto i = 0; i < 100; i++)
+	for (auto i = 0; i < 1000; i++)
 	{
 		auto o = db.create();
 

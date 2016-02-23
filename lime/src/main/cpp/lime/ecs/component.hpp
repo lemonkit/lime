@@ -53,6 +53,11 @@ namespace lime {
 
 			entity* detach();
 
+			entity* instance() const
+			{
+				return _entity;
+			}
+
 			const uuid& entity_id() const
 			{
 				return _entity->id();

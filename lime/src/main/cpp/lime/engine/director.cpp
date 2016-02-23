@@ -77,4 +77,26 @@ namespace lime{
 			stack.insert(stack.end(), children.begin(), children.end());
 		}
 	}
+
+	void director::register_system(ecs::system *sym)
+	{
+		if(_syms.count(sym->id()))
+		{
+			throw std::system_error(make_error_code(errc::duplicate_system_name));
+		}
+
+		_syms[sym->id()] = sym;
+	}
+
+	void director::run()
+	{
+		_exit = false;
+
+		while(!_exit)
+		{
+			std::unique_lock<std::mutex> lock(_mutex);
+
+			_cond.wait(lock);
+		}
+	}
 }
