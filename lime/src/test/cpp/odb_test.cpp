@@ -93,7 +93,7 @@ bench_(inser_remove)
 bench_(garbagecollect)
 {
 	stop_timer();
-	for (int i = 0; i < 100; i ++)
+	for (int i = 0; i < 200; i ++)
 	{
 		auto o = db.create();
 		o->add_property(c1_id);
