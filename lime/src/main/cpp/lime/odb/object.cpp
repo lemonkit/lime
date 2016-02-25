@@ -1,3 +1,4 @@
+#include <cassert>
 #include <lime/odb/object.hpp>
 #include <lime/odb/property.hpp>
 
@@ -5,7 +6,7 @@ namespace lime{
 	namespace odb{
 
 		object::object(database &db)
-			:_db(db),_marked(false)
+			:_db(db),_table(nullptr)
 		{
 		}
 
@@ -64,6 +65,24 @@ namespace lime{
 			if(pro)
 			{
 				_db.close_property(this, pro);
+			}
+		}
+
+		void object::attach(table* t)
+		{
+			assert(_table == nullptr);
+			_table = t;
+
+			_db.attach(this);
+		}
+
+		void object::detach(table *t)
+		{
+			if (_table == t)
+			{
+				_table = nullptr;
+
+				_db.attach(this);
 			}
 		}
 	}

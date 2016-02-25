@@ -69,9 +69,19 @@ namespace lime{
 			}
 
 		public:
+			void insert(object *obj) 
+			{
+				std::error_code ec;
 
+				insert(obj, ec);
 
-			void insert(object *obj) noexcept;
+				if(ec)
+				{
+					throw std::system_error(ec);
+				}
+			}
+
+			void insert(object *obj,std::error_code & ec) noexcept;
 
 			void remove(object *obj) noexcept;
 

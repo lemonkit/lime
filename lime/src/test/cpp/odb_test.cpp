@@ -19,7 +19,7 @@ struct column_1
 
 	~column_1()
 	{
-		lemonI(logger,"~column_1");
+		//lemonI(logger,"~column_1");
 	}
 };
 
@@ -30,7 +30,7 @@ struct column_2
 
 	~column_2()
 	{
-		lemonI(logger, "~column_2");
+		//lemonI(logger, "~column_2");
 	}
 };
 
@@ -49,7 +49,7 @@ test_(create_object)
 	o1->add_property(c1_id);
 	o1->add_property(c2_id);
 
-	while (!db.garbagecollect());
+	db.garbagecollect(true);
 
 	test_assert(db.create() == o1);
 }
@@ -73,10 +73,39 @@ test_(create_table)
 	}
 }
 
+bench_(inser_remove)
+{
+	stop_timer();
+	auto o = db.create();
+	o->add_property(c1_id);
+	o->add_property(c2_id);
+	auto t = db.get_table("test");
+	start_timer();
+
+	for (int i = 0; i < N; i++)
+	{
+		t->insert(o);
+		t->remove(o);
+	}
+}
+
+
 bench_(garbagecollect)
 {
-	for (int i = 0; i < N; i ++)
+	stop_timer();
+	for (int i = 0; i < 100; i ++)
 	{
-		while (!db.garbagecollect());
+		auto o = db.create();
+		o->add_property(c1_id);
+		o->add_property(c2_id);
 	}
+
+	start_timer();
+	
+
+	for (int i = 0; i < N; i++)
+	{
+		db.garbagecollect(true);
+	}
+	
 }

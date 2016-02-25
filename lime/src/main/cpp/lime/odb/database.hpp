@@ -149,7 +149,7 @@ namespace lime{
 
 		public:
 
-			bool garbagecollect();
+			bool garbagecollect(bool flag);
 
 		private:
 
@@ -174,14 +174,15 @@ namespace lime{
 			{
 				return _columns;
 			}
+
+			void attach(object *obj);
+			void detach(object *obj);
 			
 		private:
 			std::vector<column*>					_columns;	// register column array
 			std::vector<table*>						_tables;	// register table list
-			std::unordered_map<oid,object*>			_objects;	// cached weak reference object table
-			std::unordered_map<oid,object*>			_gc_swap;	// cached weak reference object table
+			std::unordered_set<object*>				_weakrefs;	// cached weak reference object table
 			std::vector<object*>					_cached;	// cached unused object
-			std::size_t								_gc;		// garbage counter
 		};
 	}
 }

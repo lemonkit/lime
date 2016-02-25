@@ -49,8 +49,14 @@ namespace lime{
 			_indexers.push_back(idx);
 		}
 
-		void table::insert(object *obj) noexcept
+		void table::insert(object *obj,std::error_code &ec) noexcept
 		{
+			if(obj->get_table())
+			{
+				ec = make_error_code(errc::duplicate_insert);
+				return;
+			}
+
 			auto result = _objects.insert(obj);
 
 			if(result.second)

@@ -38,16 +38,6 @@ namespace lime{
 			 */
 			void reset();
 
-			void mark(bool flag)
-			{
-				_marked = flag;
-			}
-
-			bool mark() const
-			{
-				return _marked;
-			}
-
 		public:
 
 			/**
@@ -88,18 +78,9 @@ namespace lime{
 
 		public:
 
-			void attach(table* t)
-			{
-				_table = t;
-			}
+			void attach(table* t);
 
-			void detach(table *t)
-			{
-				if(_table == t)
-				{
-					_table = nullptr;
-				}
-			}
+			void detach(table *t);
 
 			table * get_table() const
 			{
@@ -113,7 +94,6 @@ namespace lime{
 			oid								_id;
 			std::vector<object_property*>	_properties;
 			table							*_table;
-			bool							_marked;
 		};
 	}
 }

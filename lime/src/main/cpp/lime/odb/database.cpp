@@ -8,7 +8,7 @@
 namespace lime{
 	namespace odb{
 
-		database::database():_gc(0)
+		database::database()
 		{
 
 		}
@@ -24,23 +24,10 @@ namespace lime{
 			{
 				delete o;
 			}
-
-			for (auto kv : _objects)
-			{
-				delete kv.second;
-			}
-
-			
 		}
 
-		object *database::create(const oid &id, std::error_code & ec) noexcept
+		object *database::create(const oid &id, std::error_code &) noexcept
 		{
-			if(_objects.count(id) != 0)
-			{
-				ec = make_error_code(errc::duplicate_object_oid);
-				return nullptr;
-			}
-
 			object *obj = nullptr;
 
 			if(_cached.empty())
@@ -51,14 +38,14 @@ namespace lime{
 			}
 			else
 			{
-				obj = *_cached.begin();
+				obj = _cached.back();
 
 				_cached.pop_back();
 
 				obj->id(id);
 			}
 
-			_objects[id] = obj;
+			_weakrefs.insert(obj);
 
 			return obj;
 		}
@@ -144,44 +131,33 @@ namespace lime{
 			return nullptr;
 		}
 
-		bool database::garbagecollect()
+		bool database::garbagecollect(bool flag)
 		{
-			if(_cached.empty() || _gc == 1000)
+			if(flag || _cached.empty() || _weakrefs.size() > 100)
 			{
-				_gc = 0;
-
-				for(auto t :_tables)
+				for(auto o : _weakrefs)
 				{
-					for(auto o :t->objects())
-					{
-						o->mark(true);
-					}
+					o->reset();
+
+					_cached.push_back(o);
 				}
 
-				for(auto o : _objects)
-				{
-					if (o.second->mark())
-					{
-						_gc_swap[o.second->id()] = o.second;
-					}
-					else
-					{
-						o.second->reset();
-
-						_cached.push_back(o.second);
-					}
-				}
-
-				_objects.clear();
-
-				_objects.swap(_gc_swap);
+				_weakrefs.clear();
 
 				return true;
 			}
 
-			_gc++;
-
 			return false;
+		}
+
+		void database::attach(object *obj)
+		{
+			_weakrefs.erase(obj);
+		}
+
+		void database::detach(object *obj)
+		{
+			_weakrefs.insert(obj);
 		}
 	}
 }
