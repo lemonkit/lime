@@ -53,6 +53,8 @@ namespace lime{
 		{
 			if(obj->get_table())
 			{
+				if (this == obj->get_table()) return;
+
 				ec = make_error_code(errc::duplicate_insert);
 				return;
 			}

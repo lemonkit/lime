@@ -85,7 +85,7 @@ namespace lime{
 
 			void remove(object *obj) noexcept;
 
-			std::unordered_set<object*> & objects() 
+			const std::unordered_set<object*>& objects() const
 			{
 				return _objects;
 			}

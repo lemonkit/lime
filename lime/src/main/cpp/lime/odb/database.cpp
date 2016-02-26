@@ -131,7 +131,7 @@ namespace lime{
 			return nullptr;
 		}
 
-		bool database::garbagecollect(bool flag)
+		int database::garbagecollect(bool flag)
 		{
 			if(flag || _cached.empty() || _weakrefs.size() > 100)
 			{
@@ -141,13 +141,13 @@ namespace lime{
 
 					_cached.push_back(o);
 				}
-
+				auto c = _weakrefs.size();
 				_weakrefs.clear();
 
-				return true;
+				return c;
 			}
 
-			return false;
+			return 0;
 		}
 
 		void database::attach(object *obj)

@@ -7,7 +7,17 @@
 namespace lime {namespace odb{
 	enum class errc
 	{
-		duplicate_object_oid = 1,duplicate_column_oid,unknown_column_oid, duplicate_table_name,duplicate_insert
+		duplicate_object_oid = 1,
+		
+		duplicate_column_oid,
+		
+		unknown_column_oid, 
+		
+		duplicate_table_name,
+		
+		duplicate_insert,
+
+		duplicate_add_child
 	};
 
 	class ecs_error_category : public std::error_category
@@ -33,7 +43,8 @@ namespace lime {namespace odb{
 				return "insert object more than once";
 			case errc::duplicate_table_name:
 				return "duplicate table name";
-
+			case errc::duplicate_add_child:
+				return "duplicate insert child";
 			}
 
 			return "unknown";

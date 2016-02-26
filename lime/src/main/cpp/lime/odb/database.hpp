@@ -149,7 +149,7 @@ namespace lime{
 
 		public:
 
-			bool garbagecollect(bool flag);
+			int garbagecollect(bool flag);
 
 		private:
 
