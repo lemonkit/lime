@@ -39,7 +39,9 @@ namespace lime{
 			director		*_director;
 		};
 
+#ifdef WIN32_NATIVE_VIEW
 		typedef view_win32 view;
+#endif 
 	}
 }
 

@@ -14,8 +14,12 @@
 
 #ifdef WIN32
 #include <lime/device/app-win32.hpp>
+#endif
+
+#ifdef WIN32_NATIVE_VIEW
 #include <lime/device/view-win32.hpp>
 #else
+#include <lime/device/view-glfw.hpp>
 #endif 
 
 #include <lime/errors.hpp>

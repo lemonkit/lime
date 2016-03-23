@@ -4,6 +4,8 @@ plugin "github.com/gsmake/clang"
 
 plugin "github.com/gsmake/lua"
 
+plugin "github.com/gsmake/cmake"
+
 
 
 properties.lua = {
@@ -32,6 +34,11 @@ properties.clang = {
                 return "exe"
             end
         end;
-        dependencies    = { "lime" };
+        dependencies    = { "lime","glfw3" };
     };
+}
+
+
+properties.cmake = {
+    { name = "github.com/glfw/glfw",version = "3.1.2" };
 }
