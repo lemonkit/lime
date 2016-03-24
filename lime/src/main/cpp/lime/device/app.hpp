@@ -11,10 +11,8 @@
 
 #include <string>
 #include <unordered_map>
-
-#ifdef WIN32
-#include <lime/device/app-win32.hpp>
-#endif
+#include <lemon/fs/fs.hpp>
+#include <lemon/log/log.hpp>
 
 #ifdef WIN32_NATIVE_VIEW
 #include <lime/device/view-win32.hpp>
@@ -28,12 +26,26 @@ namespace lime {
 
 	class director;
 
-	class application : public device::application
+	class application : private lemon::nocopy
 	{
 	public:
-		application(const std::string & name) :device::application(name)
+		application(const std::string & name) 
 		{
+			lemon::fs::filepath path = ("./log/");
 
+			path = lemon::fs::absolute(path);
+
+			if (!lemon::fs::exists(path))
+			{
+				lemon::fs::create_directories(path);
+			}
+
+			lemon::log::add_sink(std::unique_ptr<lemon::log::sink>(new lemon::log::file_sink({ name }, path, name)));
+		}
+
+		const std::string & name() const
+		{
+			return _name;
 		}
 
 		void register_director(const std::string &name, director* dr)
@@ -51,7 +63,11 @@ namespace lime {
 			_directors.erase(name);
 		}
 
+
+		void run();
+
 	private:
+		const std::string							_name;
 		bool										_exit;
 		std::unordered_map<std::string, director*>	_directors;
 	};

@@ -34,7 +34,7 @@ properties.clang = {
                 return "exe"
             end
         end;
-        dependencies    = { "lime","glfw3" };
+        dependencies    = { "lime","glfw3","opengl" };
     };
 }
 

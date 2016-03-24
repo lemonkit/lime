@@ -11,6 +11,7 @@
 #include <string>
 #include <lemon/config.h>
 #include <lemon/nocopy.hpp>
+#include <GLFW/glfw3.h>
 
 namespace lime {
 	class director;
@@ -22,11 +23,13 @@ namespace lime {
 			view_glfw(director *dr, const std::string & name, int width = 640, int height = 960);
 			virtual ~view_glfw();
 
-			void show(bool flag);
+			virtual void show(bool ) {};
+			virtual void resolution(int , int ) {};
 
-			void resolution(int width, int height);
+			bool run_once();
 		private:
 			director		*_director;
+			GLFWwindow		*_glfwWindow;
 		};
 
 		typedef view_glfw view;

@@ -52,7 +52,7 @@ namespace lime{
 			return _view;
 		}
 
-		void run_once() noexcept;
+		bool run_once() noexcept;
 
 		bool general_director() const
 		{

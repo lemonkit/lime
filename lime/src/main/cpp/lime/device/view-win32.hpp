@@ -8,10 +8,12 @@
 #ifndef LIME_ENGINE_DEVICE_VIEW_HPP
 #define LIME_ENGINE_DEVICE_VIEW_HPP
 
-#ifdef WIN32
+#ifdef WIN32_NATIVE_VIEW
 #include <string>
 #include <lemon/config.h>
 #include <lemon/nocopy.hpp>
+
+
 namespace lime{
 	class director;
 	namespace device{
@@ -39,9 +41,8 @@ namespace lime{
 			director		*_director;
 		};
 
-#ifdef WIN32_NATIVE_VIEW
+
 		typedef view_win32 view;
-#endif 
 	}
 }
 

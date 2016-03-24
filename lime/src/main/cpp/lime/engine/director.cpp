@@ -48,8 +48,13 @@ namespace lime{
 		return nullptr;
 	}
 
-	void director::run_once() noexcept
+	bool director::run_once() noexcept
 	{
-		
+		if(!_view->run_once())
+		{
+			return false;
+		}
+
+		return true;
 	}
 }

@@ -1,14 +1,16 @@
+#ifdef WIN32_NATIVE_VIEW
+
 #include <mutex>
-#include <lime/device/app-win32.hpp>
+#include <locale> 
 #include <lime/device/view-win32.hpp>
 #include <lime/engine/director.hpp>
-
-#ifdef WIN32
 
 #define MainWndName "LimeMainDirector"
 
 namespace lime{
 	namespace device{
+
+		using string_convert = std::wstring_convert<std::codecvt<wchar_t, char, std::mbstate_t>, wchar_t>;
 
 		LRESULT view_win32::_winproc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		{
@@ -95,4 +97,4 @@ namespace lime{
 	}
 
 }
-#endif //WIN32
+#endif //WIN32_NATIVE_VIEW
