@@ -21,7 +21,7 @@ namespace lime{
 
 		eglview(director *dr);
 
-		~eglview();
+		virtual ~eglview();
 
 		void create(int width, int height);
 
@@ -29,7 +29,8 @@ namespace lime{
 		virtual EGLNativeWindowType createWindow(const std::string & name, int width, int height) = 0;
 	private:
 		EGLDisplay				_display;
-		EGLNativeWindowType		_window;
+		EGLSurface				_surface;
+		EGLContext				_context;
 	};
 }
 

@@ -33,13 +33,15 @@ namespace lime{
 
 	EGLNativeWindowType  eglview_win32:: createWindow(const std::string & name, int width, int height)
 	{
+		if (_window) return _window;
+
 		static std::once_flag flag;
 
 		std::call_once(flag, [&] { register_lime_class(); });
 
 		int smwidth = GetSystemMetrics(SM_CXSCREEN);
 
-		auto window = CreateWindowExA(
+		_window = CreateWindowExA(
 			0,
 			"Lime",
 			name.c_str(),
@@ -47,15 +49,15 @@ namespace lime{
 			smwidth - width, 0, width, height,
 			(HWND)NULL, (HMENU)NULL, ::GetModuleHandleA(NULL), (LPVOID)NULL);
 
-		if (!window)
+		if (!_window)
 		{
 			throw std::system_error(GetLastError(), std::system_category());
 		}
 		
-		::ShowWindow(window, SW_SHOW);
-		::UpdateWindow(window);
+		::ShowWindow(_window, SW_SHOW);
+		::UpdateWindow(_window);
 
-		return window;
+		return _window;
 	}
 }
 

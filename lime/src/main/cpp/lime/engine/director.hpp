@@ -18,6 +18,7 @@
 
 
 #include <lemon/nocopy.hpp>
+#include <lemon/log/log.hpp>
 #include <lime/engine/view.hpp>
 
 namespace lime{
@@ -45,7 +46,7 @@ namespace lime{
 		{
 			_view.reset(new view_type(this));
 			_input.reset(new input_type(this));
-			_worker = std::thread(&self_type::workLoop, this);
+			_worker = std::thread(&self_type::pcall, this);
 		}
 
 		~director_maker()
@@ -71,6 +72,17 @@ namespace lime{
 		}
 
 	private:
+		void pcall()
+		{
+			try
+			{
+				workLoop();
+			}
+			catch(const std::exception & e)
+			{
+				lemonE(lemon::log::get("lime"), e.what());
+			}
+		}
 		void workLoop()
 		{
 			typedef std::chrono::high_resolution_clock clock;

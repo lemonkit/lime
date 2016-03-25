@@ -12,16 +12,28 @@
 
 #if defined(LIME_EGL_VIEW) && defined(WIN32)
 
+#include <lemon/config.h>
+
 namespace lime {
 
 	class eglview_win32 : public eglview
 	{
 	public:
-		using eglview::eglview;
+		eglview_win32(director *dr):eglview(dr),_window(NULL)
+		{
 
+		}
+
+		~eglview_win32()
+		{
+			CloseWindow(_window);
+		}
 	private:
 
 		EGLNativeWindowType createWindow(const std::string & name, int width, int height) override;
+
+	private:
+		EGLNativeWindowType _window;
 	};
 }
 
