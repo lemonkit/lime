@@ -4,9 +4,27 @@ plugin "github.com/gsmake/clang"
 
 plugin "github.com/gsmake/lua"
 
-plugin "github.com/gsmake/cmake"
+task.copyexternal = function(self)
+    local fs = require "lemoon.fs"
+    local filepath = require "lemoon.filepath"
 
+    local loader = self.Owner.Loader
+    local buildconfig = self.Owner.Loader.Config.BuildConfig
 
+    local sourcedir = filepath.toslash(filepath.join(
+    self.Owner.Path,"external",
+    loader.Config.TargetHost .. "-" .. loader.Config.TargetArch .. "-" .. buildconfig))
+
+    local outputdir = filepath.toslash(filepath.join(
+        loader.Temp,"clang",
+        loader.Config.TargetHost .. "-" .. loader.Config.TargetArch .. "-" .. buildconfig))
+
+    fs.copy_dir(sourcedir,outputdir,fs.update_existing)
+end
+
+task.resources = function(self)
+end
+task.resources.Prev = "copyexternal"
 
 properties.lua = {
     dependencies        = {
@@ -20,6 +38,10 @@ properties.clang = {
         type            = "static";
         dependencies    = {
             { name = "github.com/lemonkit/lemon" };
+
+            "libEGL";
+
+            "libGLESv2";
         };
     };
 
@@ -34,11 +56,6 @@ properties.clang = {
                 return "exe"
             end
         end;
-        dependencies    = { "lime","glfw3","opengl" };
+        dependencies    = { "lime" };
     };
-}
-
-
-properties.cmake = {
-    { name = "github.com/glfw/glfw",version = "3.1.2" };
 }
