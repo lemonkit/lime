@@ -15,6 +15,10 @@ task.copyexternal = function(self)
     self.Owner.Path,"external",
     loader.Config.TargetHost .. "-" .. loader.Config.TargetArch .. "-" .. buildconfig))
 
+    if not fs.exists(sourcedir) then
+        sourcedir = filepath.toslash(filepath.join(self.Owner.Path,"external",loader.Config.TargetHost .. "-" .. loader.Config.TargetArch))
+    end
+
     local outputdir = filepath.toslash(filepath.join(
         loader.Temp,"clang",
         loader.Config.TargetHost .. "-" .. loader.Config.TargetArch .. "-" .. buildconfig))

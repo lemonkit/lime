@@ -1,12 +1,10 @@
-#include <lime/engine/win32input.hpp>
+#include <lime/sysm/win32/evtloop.hpp>
 
 #ifdef WIN32
 
-#include <lemon/config.h>
+namespace lime {namespace sysm {
 
-namespace lime{
-
-	void win32input::run_once()
+	void evtloop::dispatch_once() 
 	{
 		MSG msg;
 
@@ -16,6 +14,6 @@ namespace lime{
 			DispatchMessage(&msg);
 		}
 	}
-}
+}}
 
 #endif //WIN32
