@@ -28,9 +28,11 @@ int PASCAL WinMain(HINSTANCE ,HINSTANCE ,LPSTR, int )
 
 	lemon::log::add_sink(std::unique_ptr<lemon::log::sink>(new lemon::log::console({ "lime" })));
 
-	lime::application app("lime-simulator");
+	lime::app app;
 
-	app.make_director<lime::device_maker<lime::eglview_win32,lime::win32input>>("MainDirector");
+	auto mainDirector = app.create_director("main", { new lime::sysm::evtloop() });
+
+	mainDirector->start(new lime::gles::render(),800, 600);
 
 	app.join();
 }

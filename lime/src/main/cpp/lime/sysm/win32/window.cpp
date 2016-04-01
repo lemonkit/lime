@@ -22,7 +22,7 @@ namespace lime {namespace sysm {
 		wc.cbWndExtra = 0;
 		wc.hInstance = NULL;
 		wc.lpszClassName = "Lime";
-		wc.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);
+		wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 
 		if (!RegisterClassA(&wc))
 		{
