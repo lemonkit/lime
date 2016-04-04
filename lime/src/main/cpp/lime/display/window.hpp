@@ -8,6 +8,7 @@
 #ifndef LIME_DISPLAY_WINDOW_HPP
 #define LIME_DISPLAY_WINDOW_HPP
 #include <string>
+#include <lime/throw.hpp>
 #include <lime/errors.hpp>
 #include <lime/odb/system.hpp>
 
@@ -28,7 +29,7 @@ namespace lime {
 		{
 			if(!resizable())
 			{
-				throw std::system_error(errc::resize_error,"can't resize the window:" + _name);
+				limeThrow(errc::resize_error, "can't resize the window: %s",_name.c_str());
 			}
 
 			onresize(width, height);
