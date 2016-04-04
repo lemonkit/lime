@@ -1,0 +1,1 @@
+#include <lime/asset/asset.hpp>
