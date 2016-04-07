@@ -7,16 +7,19 @@
  */
 #ifndef LIME_DISPLAY_WINDOW_HPP
 #define LIME_DISPLAY_WINDOW_HPP
+
 #include <string>
+#include <lime/types.h>
 #include <lime/throw.hpp>
 #include <lime/errors.hpp>
-#include <lime/odb/system.hpp>
+#include <lime/ecs/system.hpp>
 
 namespace lime {
+
 	/*
 	 *	the window system
 	 */
-	class window_system : public system
+	class window_system : public ecs::system
 	{
 	public:
 		
@@ -35,22 +38,41 @@ namespace lime {
 			onresize(width, height);
 		}
 
+		LimeNativeWindowType ptr() const
+		{
+			return _ptr;
+		}
+
+		void run_once(ecs::table &) override
+		{
+
+		}
+
 	private:
 
 		virtual void onresize(int width, int height) = 0;
 
 	protected:
 		window_system(const std::string &name,bool fullwindow)
-			:_name(name),_resizable(!fullwindow)
+			:_name(name)
+			,_resizable(!fullwindow)
+			,_ptr(LimeNativeWindowType())
 		{}
 
 		void resizable(bool flag) noexcept
 		{
 			_resizable = flag;
 		}
+
+		void reset(LimeNativeWindowType ptr)
+		{
+			_ptr = ptr;
+		}
+
 	private:
 		std::string				_name;
 		bool					_resizable;
+		LimeNativeWindowType	_ptr;
 	};
 }
 
